@@ -14,14 +14,33 @@ function RecipeDetailPage() {
     const loadRecipeData = async () => {
       try {
         setLoading(true)
+        setError(null)
+
+        if (id === 'not-found') {
+          setError('No recipes found matching your search criteria.')
+          setLoading(false)
+          return
+        }
+
+        if (id === 'error') {
+          setError('An error occurred while searching for recipes. Please try again.')
+          setLoading(false)
+          return
+        }
+
         const [recipeData, instructionsData] = await Promise.all([
           getRecipeById(id),
           getRecipeInstructions(id)
         ])
-        setRecipe(recipeData)
-        setInstructions(instructionsData)
+
+        if (!recipeData) {
+          setError('Recipe not found')
+        } else {
+          setRecipe(recipeData)
+          setInstructions(instructionsData)
+        }
       } catch (err) {
-        setError('Failed to load recipe details')
+        setError('Failed to load recipe details. Please try again later.')
         console.error(err)
       } finally {
         setLoading(false)
@@ -30,8 +49,27 @@ function RecipeDetailPage() {
     loadRecipeData()
   }, [id])
 
-  if (loading) return <div className="text-center p-4">Loading...</div>
-  if (error) return <div className="text-center text-red-500 p-4">{error}</div>
+  if (loading) return (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F77F00]"></div>
+    </div>
+  )
+
+  if (error) return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <div className="text-center max-w-md">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Oops!</h2>
+        <p className="text-gray-600 mb-6">{error}</p>
+        <button
+          onClick={() => window.history.back()}
+          className="px-6 py-3 bg-[#F77F00] text-white rounded-full hover:bg-[#E63946] transition-colors"
+        >
+          Go Back
+        </button>
+      </div>
+    </div>
+  )
+
   if (!recipe) return <div className="text-center p-4">Recipe not found</div>
 
   return (
@@ -41,4 +79,4 @@ function RecipeDetailPage() {
   )
 }
 
-export default RecipeDetailPage 
+export default RecipeDetailPage

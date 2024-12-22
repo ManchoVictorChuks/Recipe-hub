@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import heroBackground from '../assets/Hero-Background.jpg';
 import { ChefHat, Menu, X, Search } from 'lucide-react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [videoError, setVideoError] = useState(false);
@@ -78,8 +80,11 @@ const LandingPage = () => {
   }, [isPlaying, benefits.length]);
 
   const handleSecretLogin = () => {
-    // Implement secret login functionality here
-    console.log('Secret login button clicked');
+    navigate('/Home');
+  };
+
+  const handleNavigation = () => {
+    navigate('/Home');
   };
 
   const scrollToSection = (sectionId) => {
@@ -224,6 +229,7 @@ const LandingPage = () => {
                       type="text"
                       placeholder="Search for recipes..."
                       className="w-full px-6 py-4 rounded-full text-gray-900 bg-white/90 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-2 focus:ring-[#F77F00]/50"
+                      onClick={handleNavigation}
                     />
                     <button
                       className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-gradient-to-r from-[#F77F00] to-[#E63946] rounded-full text-white hover:opacity-90 transition-opacity"
@@ -245,8 +251,9 @@ const LandingPage = () => {
                     transition={{ duration: 0.5, delay: 0.6 }}
                   >
                     <a
-                      href="/home"
+                      onClick={handleNavigation}
                       className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#F77F00] to-[#E63946] p-0.5 text-sm font-medium text-white hover:text-[#E63946] focus:outline-none focus:ring-4 focus:ring-[#E63946]/50"
+                      style={{ cursor: 'pointer' }}
                     >
                       <span className="relative flex items-center rounded-full bg-transparent px-8 py-3 transition-all duration-75 ease-in group-hover:bg-white md:py-4 md:text-lg md:px-10">
                         <svg 
@@ -269,8 +276,9 @@ const LandingPage = () => {
                     transition={{ duration: 0.5, delay: 0.8 }}
                   >
                     <a
-                      href="/add-recipe"
+                      onClick={handleNavigation}
                       className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#F77F00] to-[#E63946] p-0.5 text-sm font-medium text-white hover:text-[#E63946] focus:outline-none focus:ring-4 focus:ring-[#E63946]/50"
+                      style={{ cursor: 'pointer' }}
                     >
                       <span className="relative flex items-center rounded-full bg-transparent px-8 py-3 transition-all duration-75 ease-in group-hover:bg-white md:py-4 md:text-lg md:px-10">
                         <svg 
@@ -373,8 +381,9 @@ const LandingPage = () => {
                               ★ {(recipe.spoonacularScore / 20).toFixed(1)}/5
                             </span>
                             <a
-                              href={`/recipe/${recipe.id}`}
+                              onClick={handleNavigation}
                               className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#F77F00] to-[#E63946] p-0.5 text-sm font-medium text-white hover:text-[#E63946] focus:outline-none focus:ring-4 focus:ring-[#E63946]/50"
+                              style={{ cursor: 'pointer' }}
                             >
                               <span className="relative flex items-center rounded-full bg-transparent px-4 py-2 transition-all duration-75 ease-in group-hover:bg-white">
                                 <svg 
@@ -570,8 +579,9 @@ const LandingPage = () => {
                 className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-xl mx-auto"
               >
                 <a
-                  href="/home"
+                  onClick={handleNavigation}
                   className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#F77F00] to-[#E63946] p-0.5 text-sm font-medium text-white hover:text-[#E63946] focus:outline-none focus:ring-4 focus:ring-[#E63946]/50"
+                  style={{ cursor: 'pointer' }}
                 >
                   <span className="relative flex items-center rounded-full bg-transparent px-6 py-3 transition-all duration-75 ease-in group-hover:bg-white md:px-8 md:py-4">
                     <svg 
@@ -738,8 +748,9 @@ const LandingPage = () => {
                 className="text-center"
               >
                 <a
-                  href="/signup"
+                  onClick={handleNavigation}
                   className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#F77F00] to-[#E63946] p-0.5 text-sm font-medium text-white hover:text-[#E63946] focus:outline-none focus:ring-4 focus:ring-[#E63946]/50"
+                  style={{ cursor: 'pointer' }}
                 >
                   <span className="relative flex items-center rounded-full bg-transparent px-8 py-3 transition-all duration-75 ease-in group-hover:bg-white md:py-4 md:text-lg md:px-10">
                     <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -779,9 +790,9 @@ const LandingPage = () => {
             <div className="flex flex-col items-center space-y-4">
               <h3 className="text-lg font-semibold text-gray-800">Quick Links</h3>
               <div className="flex flex-col items-center space-y-2">
-                <a href="/home" className="text-gray-600 hover:text-[#F77F00] transition-colors duration-200">Home</a>
-                <a href="/favorites" className="text-gray-600 hover:text-[#F77F00] transition-colors duration-200">Favorites</a>
-                <a href="/add-recipe" className="text-gray-600 hover:text-[#F77F00] transition-colors duration-200">Add Recipe</a>
+                <a onClick={handleNavigation} className="text-gray-600 hover:text-[#F77F00] transition-colors duration-200 cursor-pointer">Home</a>
+                <a onClick={handleNavigation} className="text-gray-600 hover:text-[#F77F00] transition-colors duration-200 cursor-pointer">Favorites</a>
+                <a onClick={handleNavigation} className="text-gray-600 hover:text-[#F77F00] transition-colors duration-200 cursor-pointer">Add Recipe</a>
               </div>
             </div>
 
@@ -834,7 +845,7 @@ const NavLink = ({ onClick, children, mobile }) => {
   return (
     <span 
       className={`${baseClasses} ${mobile ? mobileClasses : desktopClasses}`} 
-      onClick={onClick}
+      onClick={() => navigate('/login')}
     >
       {children}
     </span>
