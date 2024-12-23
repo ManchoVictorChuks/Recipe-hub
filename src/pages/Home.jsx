@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import SearchBar from '../components/SearchBar'
 import RecipeCard from '../components/RecipeCard'
 import { searchRecipes, getRandomRecipes } from '../utils/api'
-import { BiBookmark, BiHeart, BiPlus, BiCategory } from 'react-icons/bi'
+import { BiBookmark, BiHeart, BiPlus, BiCategory, BiX } from 'react-icons/bi'
 import { ChefHat } from 'lucide-react';
 
 function Home() {
@@ -15,6 +15,7 @@ function Home() {
   const [clearSearch, setClearSearch] = useState(false);
   const [favorites, setFavorites] = useState([])
   const [likedRecipes, setLikedRecipes] = useState([])
+  const [createdRecipes, setCreatedRecipes] = useState([]) // Add this line
   const [openDropdown, setOpenDropdown] = useState(null)
   const navigate = useNavigate()
 
@@ -41,6 +42,57 @@ function Home() {
   useEffect(() => {
     loadRandomRecipes()
   }, [])
+
+  useEffect(() => {
+    const savedFavorites = localStorage.getItem('favorites');
+    const savedLikes = localStorage.getItem('likedRecipes');
+    const savedCreatedRecipes = localStorage.getItem('createdRecipes'); // Add this line
+    if (savedFavorites) setFavorites(JSON.parse(savedFavorites));
+    if (savedLikes) setLikedRecipes(JSON.parse(savedLikes));
+    if (savedCreatedRecipes) setCreatedRecipes(JSON.parse(savedCreatedRecipes)); // Add this line
+  }, []);
+
+  // Add this new useEffect to listen for storage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedCreatedRecipes = localStorage.getItem('createdRecipes');
+      if (savedCreatedRecipes) {
+        setCreatedRecipes(JSON.parse(savedCreatedRecipes));
+      }
+    };
+
+    // Listen for storage changes
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Initial load
+    handleStorageChange();
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
+  const handleLikeRecipe = (recipe) => {
+    setLikedRecipes(prev => {
+      const isLiked = prev.some(r => r.id === recipe.id);
+      const newLikes = isLiked 
+        ? prev.filter(r => r.id !== recipe.id)
+        : [...prev, recipe];
+      localStorage.setItem('likedRecipes', JSON.stringify(newLikes));
+      return newLikes;
+    });
+  };
+
+  const handleFavoriteRecipe = (recipe) => {
+    setFavorites(prev => {
+      const isFavorited = prev.some(r => r.id === recipe.id);
+      const newFavorites = isFavorited 
+        ? prev.filter(r => r.id !== recipe.id)
+        : [...prev, recipe];
+      localStorage.setItem('favorites', JSON.stringify(newFavorites));
+      return newFavorites;
+    });
+  };
 
   const loadRandomRecipes = async () => {
     try {
@@ -124,16 +176,63 @@ function Home() {
     navigate(`/recipe/${recipeId}`)
   }
 
-  const handleCategoryClick = (category) => {
-    setActiveCategory(category.toLowerCase())
+  const categoryToDishTypes = {
+    breakfast: ['breakfast', 'brunch', 'morning meal'],
+    lunch: ['lunch', 'main course', 'main dish', 'dinner'],
+    dinner: ['dinner', 'main course', 'main dish', 'supper'],
+    desserts: ['dessert', 'cookies', 'cakes'],
+    snacks: ['snack', 'appetizer', 'starter']
+  };
+
+  const handleCategoryClick = async (category) => {
+    setActiveCategory(category.toLowerCase());
     if (category.toLowerCase() === 'all') {
-      setClearSearch(true); // Trigger clear
+      setClearSearch(true);
       loadRandomRecipes();
-      // Reset the clear trigger after a short delay
       setTimeout(() => setClearSearch(false), 100);
+      return;
     }
-    // Later you can add else condition to filter by category
-  }
+  
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch(
+        `https://api.spoonacular.com/recipes/complexSearch?apiKey=${
+          import.meta.env.VITE_SPOONACULAR_API_KEY
+        }&type=${category.toLowerCase()}&number=12&addRecipeInformation=true`
+      );
+  
+      if (!response.ok) {
+        throw new Error('Failed to fetch recipes');
+      }
+  
+      const data = await response.json();
+      
+      if (data && data.results && Array.isArray(data.results)) {
+        const filteredRecipes = data.results.filter(recipe => 
+          recipe.dishTypes && recipe.dishTypes.some(type => 
+            categoryToDishTypes[category.toLowerCase()]?.includes(type.toLowerCase())
+          )
+        );
+  
+        const transformedRecipes = filteredRecipes.map(recipe => ({
+          id: recipe.id,
+          title: recipe.title,
+          image: recipe.image || 'default-recipe-image.jpg',
+          readyInMinutes: recipe.readyInMinutes || '??',
+          dishTypes: recipe.dishTypes || [],
+        }));
+        
+        setRecipes(transformedRecipes);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to load recipes');
+      console.error('Recipe loading error:', err);
+      setRecipes([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSurpriseMe = async () => {
     try {
@@ -157,6 +256,33 @@ function Home() {
     }
   };
 
+  const handleRemoveCreatedRecipe = (e, recipeId) => {
+    e.stopPropagation();
+    setCreatedRecipes(prev => {
+      const newRecipes = prev.filter(r => r.id !== recipeId);
+      localStorage.setItem('createdRecipes', JSON.stringify(newRecipes));
+      return newRecipes;
+    });
+  };
+  
+  const handleRemoveFavorite = (e, recipeId) => {
+    e.stopPropagation();
+    setFavorites(prev => {
+      const newFavorites = prev.filter(r => r.id !== recipeId);
+      localStorage.setItem('favorites', JSON.stringify(newFavorites));
+      return newFavorites;
+    });
+  };
+  
+  const handleRemoveLiked = (e, recipeId) => {
+    e.stopPropagation();
+    setLikedRecipes(prev => {
+      const newLiked = prev.filter(r => r.id !== recipeId);
+      localStorage.setItem('likedRecipes', JSON.stringify(newLiked));
+      return newLiked;
+    });
+  };
+
   const categories = ['All', 'Breakfast', 'Lunch', 'Dinner', 'Desserts', 'Snacks']
 
   return (
@@ -172,6 +298,47 @@ function Home() {
         </div>
         <nav className="flex-grow overflow-y-auto" ref={dropdownRef}>
           <div className="px-4 space-y-2">
+            {/* Add this new button before the Favorites button */}
+            <div className="transition-all duration-200">
+              <button
+                onClick={() => handleDropdownClick('created')}
+                className="group relative inline-flex items-center justify-between w-full p-3 rounded-lg bg-white hover:bg-gradient-to-br from-[#F77F00] to-[#E63946] transition-all duration-300"
+              >
+                <span className="relative flex items-center text-gray-600 group-hover:text-white transition-colors duration-300">
+                  <ChefHat className="mr-2 h-5 w-5" />
+                  My Recipes
+                </span>
+                <span className="bg-gray-200 rounded-full px-2 py-1 text-xs">
+                  {createdRecipes.length}
+                </span>
+              </button>
+              <div className={`overflow-hidden transition-all duration-200 ${
+                openDropdown === 'created' ? 'max-h-48' : 'max-h-0'
+              }`}>
+                <div className="bg-white shadow-inner">
+                  {createdRecipes.length > 0 ? (
+                    createdRecipes.map(recipe => (
+                      <div 
+                        key={recipe.id} 
+                        className="p-2 hover:bg-gray-100 cursor-pointer flex justify-between items-center"
+                        onClick={() => handleRecipeClick(recipe.id)}
+                      >
+                        <span className="truncate pr-2">{recipe.title}</span>
+                        <button
+                          onClick={(e) => handleRemoveCreatedRecipe(e, recipe.id)}
+                          className="p-1 hover:bg-red-100 rounded-full text-red-500"
+                        >
+                          <BiX className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-2 text-gray-500">No created recipes yet</div>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Favorites Button with Dropdown */}
             <div className="transition-all duration-200">
               <button
@@ -192,8 +359,18 @@ function Home() {
                 <div className="bg-white shadow-inner">
                   {favorites.length > 0 ? (
                     favorites.map(recipe => (
-                      <div key={recipe.id} className="p-2 hover:bg-gray-100 cursor-pointer">
-                        {recipe.title}
+                      <div 
+                        key={recipe.id} 
+                        className="p-2 hover:bg-gray-100 cursor-pointer flex justify-between items-center"
+                        onClick={() => handleRecipeClick(recipe.id)}
+                      >
+                        <span className="truncate pr-2">{recipe.title}</span>
+                        <button
+                          onClick={(e) => handleRemoveFavorite(e, recipe.id)}
+                          className="p-1 hover:bg-red-100 rounded-full text-red-500"
+                        >
+                          <BiX className="w-4 h-4" />
+                        </button>
                       </div>
                     ))
                   ) : (
@@ -223,8 +400,18 @@ function Home() {
                 <div className="bg-white shadow-inner">
                   {likedRecipes.length > 0 ? (
                     likedRecipes.map(recipe => (
-                      <div key={recipe.id} className="p-2 hover:bg-gray-100 cursor-pointer">
-                        {recipe.title}
+                      <div 
+                        key={recipe.id} 
+                        className="p-2 hover:bg-gray-100 cursor-pointer flex justify-between items-center"
+                        onClick={() => handleRecipeClick(recipe.id)}
+                      >
+                        <span className="truncate pr-2">{recipe.title}</span>
+                        <button
+                          onClick={(e) => handleRemoveLiked(e, recipe.id)}
+                          className="p-1 hover:bg-red-100 rounded-full text-red-500"
+                        >
+                          <BiX className="w-4 h-4" />
+                        </button>
                       </div>
                     ))
                   ) : (
@@ -323,13 +510,42 @@ function Home() {
             ) : error ? (
               <div className="text-center text-red-500 p-4">{error}</div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {recipes.map(recipe => (
-                  <RecipeCard
-                    key={recipe.id}
-                    recipe={recipe}
-                    onView={handleRecipeClick}
-                  />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8 max-w-[1200px] mx-auto px-4">
+                {recipes.slice(0, 9).map(recipe => (
+                  <div key={recipe.id} className="relative group">
+                    <RecipeCard
+                      recipe={{
+                        id: recipe.id,
+                        title: recipe.title,
+                        image: recipe.image || 'default-recipe-image.jpg',
+                        readyInMinutes: recipe.readyInMinutes || '??',
+                        dishTypes: recipe.dishTypes || [],
+                      }}
+                      onView={handleRecipeClick}
+                    />
+                    <div className="absolute top-2 right-2 flex gap-2">
+                      <button
+                        onClick={() => handleLikeRecipe(recipe)}
+                        className={`p-2 rounded-full ${
+                          likedRecipes.some(r => r.id === recipe.id)
+                            ? 'bg-red-500 text-white'
+                            : 'bg-white/80 text-gray-600'
+                        } hover:scale-110 transition-transform duration-200`}
+                      >
+                        <BiHeart className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => handleFavoriteRecipe(recipe)}
+                        className={`p-2 rounded-full ${
+                          favorites.some(r => r.id === recipe.id)
+                            ? 'bg-yellow-500 text-white'
+                            : 'bg-white/80 text-gray-600'
+                        } hover:scale-110 transition-transform duration-200`}
+                      >
+                        <BiBookmark className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
@@ -340,4 +556,4 @@ function Home() {
   )
 }
 
-export default Home
+export default Home;

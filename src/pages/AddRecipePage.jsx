@@ -1,12 +1,28 @@
 import AddRecipeForm from '../components/AddRecipeForm'
+import { useNavigate } from 'react-router-dom' // Add this import
 
 function AddRecipePage() {
+  const navigate = useNavigate(); // Add this
+
   const handleSubmit = async (recipeData) => {
     try {
-      // Implement recipe submission logic
-      console.log('Submitting recipe:', recipeData)
+      const recipe = {
+        ...recipeData,
+        id: Date.now(),
+      };
+
+      const existingRecipes = JSON.parse(localStorage.getItem('createdRecipes') || '[]');
+      const updatedRecipes = [...existingRecipes, recipe];
+      
+      localStorage.setItem('createdRecipes', JSON.stringify(updatedRecipes));
+      console.log('Recipe saved successfully:', recipe);
+      
+      // Navigate back to home page after successful save
+      navigate('/');
+      
     } catch (error) {
-      console.error('Error submitting recipe:', error)
+      console.error('Error submitting recipe:', error);
+      alert('Failed to save recipe. Please try again.');
     }
   }
 
