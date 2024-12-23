@@ -21,7 +21,15 @@ function RecipeDetailPage() {
         const createdRecipe = createdRecipes.find(recipe => recipe.id.toString() === id.toString())
 
         if (createdRecipe) {
-          // Format the created recipe to match the expected structure
+          const defaultImagePath = '/default-recipe-image.jpg';
+          
+          // Better image validation
+          const getImagePath = (img) => {
+            if (!img) return defaultImagePath;
+            if (typeof img !== 'string') return defaultImagePath;
+            return img.startsWith('data:') ? img : defaultImagePath;
+          };
+          
           setRecipe({
             ...createdRecipe,
             extendedIngredients: createdRecipe.ingredients?.map(ing => ({
@@ -29,17 +37,26 @@ function RecipeDetailPage() {
               id: Math.random()
             })) || [],
             instructions: createdRecipe.instructions,
-            readyInMinutes: createdRecipe.cookingTime || '??',
-            servings: createdRecipe.servings || '1',
-            image: createdRecipe.image || 'default-recipe-image.jpg'
+            readyInMinutes: createdRecipe.cookingTime || 30, // Changed to use cookingTime
+            servings: createdRecipe.servings || 4, // Changed to use servings
+            image: getImagePath(createdRecipe.image)
           });
-          // For created recipes, instructions are stored directly
-          setInstructions([{
-            steps: [{ 
-              step: createdRecipe.instructions,
-              number: 1 
-            }]
-          }]);
+          // Ensure instructions is a string and handle different formats
+          const instructionsText = typeof createdRecipe.instructions === 'string' 
+            ? createdRecipe.instructions 
+            : Array.isArray(createdRecipe.instructions)
+              ? createdRecipe.instructions.join('\n')
+              : String(createdRecipe.instructions || '');
+
+          const instructionsArray = instructionsText
+            .split('\n')
+            .filter(step => step.trim())
+            .map((step, index) => ({
+              number: index + 1,
+              step: step.trim()
+            }));
+          
+          setInstructions(instructionsArray);
           setLoading(false);
           return;
         }

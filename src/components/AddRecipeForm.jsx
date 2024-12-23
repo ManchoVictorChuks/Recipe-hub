@@ -1,22 +1,48 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-function AddRecipeForm({ onSubmit }) {
-  const navigate = useNavigate()
-  const [recipe, setRecipe] = useState({
+function AddRecipeForm({ onSubmit, initialData, onFormChange }) {
+  const navigate = useNavigate();
+  const [recipe, setRecipe] = useState(() => ({
     title: '',
     description: '',
     ingredients: [''],
     instructions: [''],
-    image: ''
-  })
+    image: '',
+    cookingTime: 30,
+    servings: 4,
+    ...initialData
+  }));
+
+  // Only update from initialData when it actually changes
+  useEffect(() => {
+    if (initialData && JSON.stringify(initialData) !== JSON.stringify(recipe)) {
+      setRecipe(initialData);
+    }
+  }, [initialData]); // Remove recipe from dependencies
+
+  const handleInputChange = (field, value) => {
+    const updated = { ...recipe, [field]: value };
+    setRecipe(updated);
+    onFormChange?.(updated);
+  };
+
+  const handleArrayChange = (field, index, value) => {
+    const newArray = [...recipe[field]];
+    newArray[index] = value;
+    const updated = { ...recipe, [field]: newArray };
+    setRecipe(updated);
+    onFormChange?.(updated);
+  };
 
   const [errors, setErrors] = useState({
     title: '',
     description: '',
     ingredients: [],
     instructions: [],
-    image: ''
+    image: '',
+    cookingTime: '',
+    servings: ''
   })
 
   const [showSuccess, setShowSuccess] = useState(false)
@@ -81,7 +107,9 @@ function AddRecipeForm({ onSubmit }) {
       description: '',
       ingredients: [],
       instructions: [],
-      image: ''
+      image: '',
+      cookingTime: '',
+      servings: ''
     }
     let isValid = true
 
@@ -138,7 +166,7 @@ function AddRecipeForm({ onSubmit }) {
               type="text"
               placeholder="Recipe Title"
               value={recipe.title}
-              onChange={e => setRecipe(prev => ({ ...prev, title: e.target.value }))}
+              onChange={e => handleInputChange('title', e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
             />
             {errors.title && (
@@ -154,12 +182,93 @@ function AddRecipeForm({ onSubmit }) {
               id="description"
               placeholder="Recipe Description"
               value={recipe.description}
-              onChange={e => setRecipe(prev => ({ ...prev, description: e.target.value }))}
+              onChange={e => handleInputChange('description', e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md h-32 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
             />
             {errors.description && (
               <p className="text-red-500 text-sm mt-1">{errors.description}</p>
             )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-8 bg-gray-50 p-6 rounded-xl">
+            <div className="space-y-3">
+              <label className="block text-lg font-medium text-gray-700">
+                Cooking Time
+              </label>
+              <div className="flex items-center space-x-4">
+                <div className="flex-1 relative bg-white rounded-lg shadow-sm">
+                  <input
+                    type="number"
+                    id="cookingTime"
+                    min="1"
+                    max="480"
+                    value={recipe.cookingTime}
+                    onChange={(e) => handleInputChange('cookingTime', Math.max(1, parseInt(e.target.value) || 0))}
+                    className="w-full pl-4 pr-12 py-3 border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-colors text-lg"
+                  />
+                  <div className="absolute right-0 top-0 h-full flex items-center pr-3">
+                    <div className="flex flex-col items-center">
+                      <button
+                        type="button"
+                        onClick={() => handleInputChange('cookingTime', Math.min(480, (recipe.cookingTime || 0) + 5))}
+                        className="text-gray-500 hover:text-amber-600 focus:outline-none p-1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleInputChange('cookingTime', Math.max(1, (recipe.cookingTime || 0) - 5))}
+                        className="text-gray-500 hover:text-amber-600 focus:outline-none p-1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2 bg-amber-100 px-4 py-2 rounded-lg">
+                  <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-amber-800 font-medium">mins</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="block text-lg font-medium text-gray-700">
+                Servings
+              </label>
+              <div className="bg-white p-4 rounded-lg shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-2xl font-semibold text-amber-600">
+                    {recipe.servings === 8 ? '7+' : recipe.servings}
+                  </span>
+                  <span className="text-gray-500">people</span>
+                </div>
+                <input
+                  type="range"
+                  id="servings"
+                  min="1"
+                  max="8"
+                  value={recipe.servings}
+                  onChange={(e) => handleInputChange('servings', parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>1</span>
+                  <span>2</span>
+                  <span>3</span>
+                  <span>4</span>
+                  <span>5</span>
+                  <span>6</span>
+                  <span>7+</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="image-upload-section space-y-3">
@@ -204,11 +313,7 @@ function AddRecipeForm({ onSubmit }) {
                     type="text"
                     value={ingredient}
                     placeholder={`Ingredient ${index + 1}`}
-                    onChange={e => {
-                      const newIngredients = [...recipe.ingredients]
-                      newIngredients[index] = e.target.value
-                      setRecipe(prev => ({ ...prev, ingredients: newIngredients }))
-                    }}
+                    onChange={e => handleArrayChange('ingredients', index, e.target.value)}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                   />
                   {recipe.ingredients.length > 1 && (
@@ -249,11 +354,7 @@ function AddRecipeForm({ onSubmit }) {
                   <textarea
                     value={instruction}
                     placeholder={`Step ${index + 1}`}
-                    onChange={e => {
-                      const newInstructions = [...recipe.instructions]
-                      newInstructions[index] = e.target.value
-                      setRecipe(prev => ({ ...prev, instructions: newInstructions }))
-                    }}
+                    onChange={e => handleArrayChange('instructions', index, e.target.value)}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-md h-24 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                   />
                   {recipe.instructions.length > 1 && (

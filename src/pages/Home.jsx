@@ -283,6 +283,21 @@ function Home() {
     });
   };
 
+  const handleEditRecipe = (e, recipe) => {
+    e.stopPropagation();
+    const existingRecipe = {
+      id: recipe.id,
+      title: recipe.title,
+      description: recipe.description || '',
+      ingredients: recipe.ingredients || [''],
+      instructions: recipe.instructions || [''],
+      image: recipe.image || '',
+      cookingTime: recipe.cookingTime || 30,
+      servings: recipe.servings || 4
+    };
+    navigate('/add-recipe', { state: { recipe: existingRecipe, isEditing: true } });
+  };
+
   const categories = ['All', 'Breakfast', 'Lunch', 'Dinner', 'Desserts', 'Snacks']
 
   return (
@@ -324,12 +339,22 @@ function Home() {
                         onClick={() => handleRecipeClick(recipe.id)}
                       >
                         <span className="truncate pr-2">{recipe.title}</span>
-                        <button
-                          onClick={(e) => handleRemoveCreatedRecipe(e, recipe.id)}
-                          className="p-1 hover:bg-red-100 rounded-full text-red-500"
-                        >
-                          <BiX className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center space-x-1">
+                          <button
+                            onClick={(e) => handleEditRecipe(e, recipe)}
+                            className="p-1 hover:bg-blue-100 rounded-full text-blue-500"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={(e) => handleRemoveCreatedRecipe(e, recipe.id)}
+                            className="p-1 hover:bg-red-100 rounded-full text-red-500"
+                          >
+                            <BiX className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     ))
                   ) : (
