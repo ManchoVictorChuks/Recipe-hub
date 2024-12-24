@@ -1,7 +1,8 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
+import { BiTime, BiHeart, BiBookmark } from 'react-icons/bi';
 
-const RecipeCard = ({ recipe, onView }) => {
+const RecipeCard = ({ recipe, onView, onLike, onFavorite, isLiked, isFavorited }) => {
   return (
     <div 
       onClick={() => onView(recipe.id)}
@@ -15,6 +16,34 @@ const RecipeCard = ({ recipe, onView }) => {
           className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"/>
+        <div className="absolute top-2 right-2 flex gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onLike(recipe);
+            }}
+            className={`p-2 rounded-full ${
+              isLiked 
+                ? 'bg-red-500 text-white' 
+                : 'bg-white/80 text-gray-600'
+            } hover:scale-110 transition-transform duration-200`}
+          >
+            <BiHeart className="w-5 h-5" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onFavorite(recipe);
+            }}
+            className={`p-2 rounded-full ${
+              isFavorited 
+                ? 'bg-yellow-500 text-white' 
+                : 'bg-white/80 text-gray-600'
+            } hover:scale-110 transition-transform duration-200`}
+          >
+            <BiBookmark className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Content Container */}

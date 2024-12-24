@@ -4,6 +4,9 @@ import heroBackground from '../assets/Hero-Background.jpg';
 import { ChefHat, Menu, X, Search } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import anitaPhoto from '../assets/Anita-Olang (1).jpg';
+import victorPhoto from '../assets/Victor-Mancho.png';
+import ayomikunPhoto from '../assets/Ayomikun-Abass.jpg';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -429,7 +432,7 @@ const LandingPage = () => {
 
           {/* Developer Cards */}
           <div className="space-y-20 md:space-y-24">
-            {/* First Developer */}
+            {/* Anita Olang */}
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -438,20 +441,20 @@ const LandingPage = () => {
             >
               <div className="w-64 h-64 rounded-full overflow-hidden shadow-xl flex-shrink-0">
                 <img
-                  src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80"
-                  alt="Developer 1"
+                  src={anitaPhoto}
+                  alt="Anita Olang"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div>
-                <h3 className="text-2xl font-liber mb-4">Sarah Johnson</h3>
+                <h3 className="text-2xl font-liber mb-4">Anita Olang</h3>
                 <p className="text-lg text-gray-600 leading-relaxed">
-                  Full Stack Developer and UI/UX enthusiast with a passion for creating seamless user experiences. Sarah leads the frontend development of RecipeHub, ensuring that every interaction feels natural and engaging.
+                  Backend Developer and Brand Designer. Anita expertly crafted the backend architecture, implemented local storage functionality, and created our distinctive logo design, ensuring a seamless and memorable user experience.
                 </p>
               </div>
             </motion.div>
 
-            {/* Second Developer */}
+            {/* Victor Mancho */}
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -460,20 +463,20 @@ const LandingPage = () => {
             >
               <div className="w-64 h-64 rounded-full overflow-hidden shadow-xl flex-shrink-0">
                 <img
-                  src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6"
-                  alt="Developer 2"
+                  src={victorPhoto}
+                  alt="Victor Mancho"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div>
-                <h3 className="text-2xl font-liber mb-4">Michael Chen</h3>
+                <h3 className="text-2xl font-liber mb-4">Victor Mancho</h3>
                 <p className="text-lg text-gray-600 leading-relaxed">
-                  Backend wizard and database architect. Michael ensures that RecipeHub runs smoothly behind the scenes, handling complex recipe calculations and user data management with expertise.
+                  Frontend Developer and UX Designer. Victor led the frontend development, creating an intuitive and engaging user interface while ensuring smooth navigation and optimal user flow throughout the website.
                 </p>
               </div>
             </motion.div>
 
-            {/* Third Developer */}
+            {/* Ayomikun Abass */}
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -482,15 +485,15 @@ const LandingPage = () => {
             >
               <div className="w-64 h-64 rounded-full overflow-hidden shadow-xl flex-shrink-0">
                 <img
-                  src="https://images.unsplash.com/photo-1499952127939-9bbf5af6c51c"
-                  alt="Developer 3"
-                  className="w-full h-full object-cover"
+                  src={ayomikunPhoto}
+                  alt="Ayomikun Abass"
+                  className="w-full h-full object-cover object-top"
                 />
               </div>
               <div>
-                <h3 className="text-2xl font-liber mb-4">Emily Rodriguez</h3>
+                <h3 className="text-2xl font-liber mb-4">Ayomikun Abass</h3>
                 <p className="text-lg text-gray-600 leading-relaxed">
-                  Quality Assurance lead and DevOps engineer. Emily ensures that every feature works flawlessly across all devices and maintains the high standards of RecipeHub's performance.
+                  Quality Assurance Lead. Ayomikun ensures the highest standards of functionality by thoroughly testing features, verifying link integrity, and maintaining seamless operation across the entire application.
                 </p>
               </div>
             </motion.div>
